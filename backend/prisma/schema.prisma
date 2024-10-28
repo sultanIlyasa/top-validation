@@ -1,0 +1,197 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  COMPANY
+  ANALYST
+}
+
+enum ScheduleStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  RESCHEDULED
+  COMPLETED
+}
+
+enum CallStatus {
+  WAITING
+  CONNECTED
+  ENDED
+  FAILED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String
+  firstName    String?
+  lastName     String?
+  profpicUrl   String?
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  refreshToken String?
+
+  // Relations
+  company Company?
+  analyst Analyst?
+  admin   Admin?
+
+  // Reversed relations for better querying
+  schedulesAsCompany  Schedule[]  @relation("CompanySchedules")
+  schedulesAsAnalyst  Schedule[]  @relation("AnalystSchedules")
+  videoCallsAsCompany VideoCall[] @relation("CompanyVideoCalls")
+  videoCallsAsAnalyst VideoCall[] @relation("AnalystVideoCalls")
+  locations           Location[]
+}
+
+model Company {
+  id     String @id @default(cuid()) // Unique ID for the company
+  userId String @unique // Unique ID for the user
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade) // User relation with proper constraints 
+
+  companyName String
+
+  // Location information
+  address CompanyAddress? // Address relation
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Separate address model for better organization
+model CompanyAddress {
+  id        String  @id @default(cuid()) // Unique ID for the address
+  companyId String  @unique // Unique ID for the company
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade) // Company relation with proper constraints
+
+  country   String
+  state     String?
+  province  String?
+  city      String?
+  district  String?
+  latitude  Float?
+  longitude Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Analyst {
+  id     String @id @default(cuid()) // Unique ID for the analyst
+  userId String @unique // Unique ID for the user
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade) // User relation with proper constraints
+
+  nikEmployee String  @unique // Unique NIK for the analyst
+  position    String?
+  superior    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Admin {
+  id     String @id @default(cuid()) // Unique ID for the admin
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Schedule {
+  id String @id @default(cuid()) // Unique ID for the schedule
+
+  // Relations with proper constraints
+  companyId String // Company ID for the schedule
+  company   User   @relation("CompanySchedules", fields: [companyId], references: [id]) // Company relation with proper constraints 
+  analystId String // Analyst ID for the schedule
+  analyst   User   @relation("AnalystSchedules", fields: [analystId], references: [id]) // Analyst relation with proper constraints
+
+  date      DateTime // Date of the schedule
+  startTime DateTime // Start time of the schedule
+  endTime   DateTime // End time of the schedule
+  status    ScheduleStatus @default(PENDING)
+  // notes     String? 
+
+  // Related video call if any
+  videoCall VideoCall? // Video call relation
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId]) // 
+  @@index([analystId])
+  @@index([date])
+}
+
+model VideoCall {
+  id         String   @id @default(cuid())
+  scheduleId String   @unique
+  schedule   Schedule @relation(fields: [scheduleId], references: [id])
+
+  // Relations with proper constraints
+  companyId String
+  company   User   @relation("CompanyVideoCalls", fields: [companyId], references: [id])
+  analystId String
+  analyst   User   @relation("AnalystVideoCalls", fields: [analystId], references: [id])
+
+  // WebRTC specific fields
+  roomId String     @unique
+  status CallStatus @default(WAITING)
+
+  // call documentation
+  callImageURL String[]
+  videoUrl     String
+  expiredDate  DateTime
+
+  // Current call location
+  location Location?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([analystId])
+}
+
+model Location {
+  id String @id @default(cuid())
+
+  // Relations
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+  videoCallId String?    @unique
+  videoCall   VideoCall? @relation(fields: [videoCallId], references: [id])
+
+  // Location data
+  country   String
+  state     String?
+  province  String?
+  city      String?
+  district  String?
+  latitude  Float
+  longitude Float
+
+  isMatched Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
