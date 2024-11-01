@@ -13,10 +13,11 @@ interface UserData {
   lastName: string;
   company?: {
     id: string;
-    // Add other company fields as needed
+    companyName: string;
   };
   analyst?: {
     id: string;
+    nikEmployeeId: string;
     // Add other analyst fields as needed
   };
   admin?: {
@@ -34,18 +35,19 @@ declare module "next/server" {
 
 // Define protected routes and their required roles
 export const protectedRoutes = {
-  "/api/dashboard": ["ADMIN", "ANALYST", "COMPANY"] as Role[],
-  "/api/admin": ["ADMIN"] as Role[],
-  "/api/analytics": ["ANALYST"] as Role[],
-  "/api/company": ["COMPANY"] as Role[],
+  "/": ["ANALYST", "COMPANY"] as Role[],
+  "/profile": ["ANALYST", "COMPANY"] as Role[],
+  "/profile/form": ["ANALYST", "COMPANY"] as Role[],
+  "/scheduler": ["ANALYST", "COMPANY"] as Role[],
+  "/video-call": ["ANALYST", "COMPANY"] as Role[],
+  "/admin": ["ADMIN"] as Role[],
 } as const;
 
 // Define public routes that don't need authentication
 export const publicRoutes = [
-  "/api/auth/login",
-  "/api/auth/register",
-  "/api/auth/refresh",
-  "/api/public",
+  "/auth/login",
+  "/auth/register",
+  "/auth/new-password",
 ] as const;
 
 export function withAuth(handler: Function) {
@@ -68,7 +70,7 @@ export function withAuth(handler: Function) {
 
       // Verify token using the correct endpoint that matches your JWT_ACCESS_SECRET
       const verifyResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/profile`,
+        `${process.env.NEXT_PUBLIC_API_URL}/`,
         {
           method: "GET",
           headers: {

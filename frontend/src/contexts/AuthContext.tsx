@@ -1,11 +1,7 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
+"use client";
+import { createContext, useContext, useState, ReactNode } from "react";
 import { authService } from "@/services/api";
+import { useEffect } from "react";
 
 interface User {
   id: string;

@@ -1,4 +1,5 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
+import { AxiosError } from "axios";
 
 interface Tokens {
   access_token: string;
@@ -110,4 +111,19 @@ export const authService = {
   },
 };
 
+export const dashboardService = {
+  analyst: {
+    async getDashboardData(): Promise<any> {
+      const { data } = await api.get<any>("/dashboard");
+      return data;
+    },
+  },
+
+  company: {
+    async getDashboardData(): Promise<any> {
+      const { data } = await api.get<any>("/dashboard");
+      return data;
+    },
+  },
+};
 export default api;
