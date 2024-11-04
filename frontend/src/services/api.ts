@@ -85,15 +85,19 @@ api.interceptors.response.use(
 
 export const authService = {
   async login(email: string, password: string): Promise<LoginResponse> {
-    const { data } = await api.post<LoginResponse>("/auth/login", {
-      email,
-      password,
-    });
-
-    localStorage.setItem("access_token", data.access_token);
-    localStorage.setItem("refresh_token", data.refresh_token);
-
-    return data;
+    try {
+      const response = await axios.post<LoginResponse>(
+        "http://localhost:8000/auth/login",
+        {
+          email,
+          password,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Login failed:", error);
+      throw new Error("Invalid email or password. Please try again.");
+    }
   },
 
   async logout() {

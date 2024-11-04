@@ -13,9 +13,9 @@ import {
 import { toast, useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { Button } from "../ui/button";
+import { signIn, useSession } from "next-auth/react";
 
 const loginFormSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -27,8 +27,7 @@ const loginFormSchema = z.object({
     }),
 });
 
-const LoginForm = () => {
-  const { login } = useAuth();
+const LoginForm: React.FC = () => {
   const router = useRouter();
   const { toast } = useToast();
 
@@ -41,16 +40,22 @@ const LoginForm = () => {
   });
 
   async function onSubmit(values: z.infer<typeof loginFormSchema>) {
-    try {
-      await login(values.email, values.password);
-      router.push("/");
-    } catch (error) {
-      console.error("Login failed:", error);
+    const result = await signIn("credentials", {
+      redirect: false, // Prevent automatic redirect; handle manually below
+      email: values.email,
+      password: values.password,
+    });
+
+    if (result?.error) {
+      // Show error toast if login fails
       toast({
         title: "Login Error",
         description: "Invalid email or password. Please try again.",
-        variant: "destructive", // Optional: change the variant to make it stand out
+        variant: "destructive",
       });
+    } else {
+      // Redirect on successful login
+      router.push("/");
     }
   }
 
@@ -93,7 +98,7 @@ const LoginForm = () => {
         />
 
         <div className="flex flex-row-reverse mx-auto mr-10 my-4">
-          <Link href={"#"} className="text-[#00CA87] text-sm">
+          <Link href={"/forgot-password"} className="text-[#00CA87] text-sm">
             Forgot Password?
           </Link>
         </div>

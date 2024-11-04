@@ -1,11 +1,12 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { AuthGuard } from 'src/auth/guard/auth.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
-  @Get('select-all')
+  @Get('api/select-all')
   async getAllUsers() {
     return this.usersService.getAllUsers();
   }
@@ -22,8 +23,15 @@ export class UsersController {
     return this.usersService.deleteUser(data);
   }
 
+  @UseGuards(AuthGuard) // 👈 Add this decorator to the route handler for protecting API
   @Get(':id')
   async getUserbyId(@Param('id') id: string) {
+    return this.usersService.findOneById(id);
+  }
+
+  @UseGuards(AuthGuard) // 👈 Add this decorator to the route handler for protecting API
+  @Get('dashboard/:id')
+  async getUserDashboard(@Param('id') id: string) {
     return this.usersService.findOneById(id);
   }
 }

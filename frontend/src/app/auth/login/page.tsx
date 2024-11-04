@@ -1,56 +1,14 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React from "react";
 import Image from "next/image";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import LoginForm from "@/components/auth/loginForm";
 import Link from "next/link";
-import ReCAPTCHA from "react-google-recaptcha";
-import ReCAPTCHAWrapper from "@/components/recaptchaWrapper";
-import { Button } from "@/components/ui/button";
 
 const loginpage = () => {
-  const loginFormRef = useRef<HTMLFormElement>(null);
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
-  const [isVerified, setIsVerified] = useState(false);
-
-  const handleExternalSubmit = () => {
-    if (loginFormRef.current) {
-      loginFormRef.current.submit();
-    }
-  };
-
-  // async function handleCaptchaSubmission(token: string | null) {
-  //   try {
-  //     if (token) {
-  //       await fetch("/api", {
-  //         method: "POST",
-  //         headers: {
-  //           Accept: "application/json",
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({ token }),
-  //       });
-  //       setIsVerified(true);
-  //     }
-  //   } catch (e) {
-  //     setIsVerified(false);
-  //   }
-  // }
-
-  // const handleChange = (token: string | null) => {
-  //   handleCaptchaSubmission(token);
-  // };
-
-  function handleExpired() {
-    setIsVerified(false);
-  }
-
   return (
     <div className="mx-auto min-h-screen flex flex-col items-center md:flex-row md:justify-center md:gap-28">
       <section className="mt-44 flex flex-col items-center md:mt-0">
@@ -73,14 +31,6 @@ const loginpage = () => {
         <CardContent className="mt-6 pb-0">
           <LoginForm />
         </CardContent>
-
-        {/* <div className="flex justify-center items-center">
-         
-          <ReCAPTCHAWrapper
-            sitekey="6LcbZ14qAAAAAElCmdg6jKPhvIeh4nGFAJb9lcmH"
-            onChange={handleChange}
-          />
-        </div> */}
         <div className="flex flex-row items-center justify-center mt-4">
           <Link href={"#"} className="text-xs text-gray-500">
             Terms of user
