@@ -66,6 +66,7 @@ model Company {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade) // User relation with proper constraints 
 
   companyName String
+  positions   String?
 
   // Location information
   address CompanyAddress? // Address relation
@@ -80,21 +81,18 @@ model CompanyAddress {
   companyId String  @unique // Unique ID for the company
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade) // Company relation with proper constraints
 
-  displayName String? // Display name for the address
+  companyAddress String? // Display name for the address
 
   // Address fields
-  road          String?
-  city_block    String?
-  neighborhood  String?
-  suburb        String?
-  city_district String?
-  city          String?
-  region        String?
-  postcode      String?
-  country       String?
-  country_code  String?
-  latitude      Float?
-  longitude     Float?
+  province String?
+  district String?
+  city     String?
+  region   String?
+  postcode String?
+  country  String?
+
+  latitude  Float?
+  longitude Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

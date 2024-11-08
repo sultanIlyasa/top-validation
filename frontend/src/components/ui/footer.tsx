@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import Image from "next/image";
 import {
@@ -11,7 +12,7 @@ const Footer = () => {
   return (
     <footer className="bg-[#00332D]">
       <div className="flex flex-col md:flex-row md:justify-evenly">
-        <div className="flex flex-col items-center justify-center">
+        <div className="mx-2 px-2 flex flex-col items-center justify-center md:items-start">
           <Image
             src={"/bixbox-logo.png"}
             width={100}
@@ -110,20 +111,22 @@ const Footer = () => {
             Dapatkan berita terbaru dan penawaran eksklusif BixBox <br />{" "}
             langsung ke email Anda!
           </p>
-          <div className="flex flex-row items-center justify-center my-4 gap-10">
-            <input
-              type="email"
-              placeholder="Masukkan email Anda"
-              className="bg-white p-1 w-[70%] rounded-2xl placeholder:text-slate-400 placeholder:text-sm placeholder:px-2"
-            />
-            <button className=" text-white p-2 rounded-2xl" title="Send">
-              <Image
-                src={"/footer/mail.png"}
-                width={20}
-                height={20}
-                alt="send"
-              ></Image>
-            </button>
+          <div className="flex flex-row my-4">
+            <div className="flex flex-row gap-10 sm:gap-0 sm:bg-white sm:p-1 sm:w-full rounded-2xl">
+              <input
+                type="email"
+                placeholder="Masukkan email Anda"
+                className="bg-white p-1 w-[100%] rounded-2xl placeholder:text-slate-400 placeholder:text-sm placeholder:px-2"
+              />
+              <button className=" text-white p-2 rounded-2xl" title="Send">
+                <Image
+                  src={"/footer/mail.png"}
+                  width={20}
+                  height={20}
+                  alt="send"
+                ></Image>
+              </button>
+            </div>
           </div>
           <div className="flex flex-row gap-3">
             <Image
@@ -159,9 +162,9 @@ const Footer = () => {
       </div>
 
       {/* Payment partners */}
-      <div className="bg-[#002621] flex flex-col md:flex-row md:justify-center items-center md:mt-16 py-5 text-white">
+      <div className="bg-[#002621] flex flex-col md:flex-row md:justify-center items-center md:mt-16 py-5 text-white ">
         <p className="mb-8 md:mb-0">&copy; 2024 BixBox. All Rights Reserved</p>
-        <div className=" mx-4 grid grid-cols-5 gap-1 md:flex md:flex-row">
+        <div className="mx-4 grid grid-cols-5 gap-1 md:flex md:flex-row mb-14 lg:my-2">
           <Image
             src="/footer/visa.png"
             width={60}

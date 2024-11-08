@@ -3,12 +3,15 @@ import localFont from "next/font/local";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import Navbar from "@/components/ui/navbar";
+import Footer from "@/components/ui/footer";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
   weight: "100 900",
 });
+
 const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
@@ -32,11 +35,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Providers>
-        <body className={`${plusJakartaSans.className} antialiased`}>
-          {children}
-        </body>
-      </Providers>
+      <body className={`${plusJakartaSans.className} antialiased`}>
+        <Providers>
+          <Navbar />
+          <main className="sm:pb-0">{children}</main>
+
+          <Footer />
+        </Providers>
+      </body>
     </html>
   );
 }

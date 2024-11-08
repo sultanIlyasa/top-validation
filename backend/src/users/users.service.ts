@@ -42,6 +42,7 @@ export class UsersService {
     }
     // hash password
     data.password = await bcrypt.hash(data.password, 10);
+
     return this.prisma.user.create({
       data,
     });
@@ -80,7 +81,7 @@ export class UsersService {
     return await this.prisma.user.findUnique({
       where: { id: id },
       include: {
-        company: true,
+        company: { include: { address: true } },
         analyst: true,
         admin: true,
       },
