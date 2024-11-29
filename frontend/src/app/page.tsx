@@ -1,7 +1,8 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 import { Backend_URL } from "@/lib/Constants";
-import Footer from "@/components/ui/footer";
+import CompanyDashboardPanel from "@/components/company/CompanyDashboardPanel";
+import CompanyLocationDashboard from "@/components/company/CompanyLocationDashboard";
 
 type Props = {
   params: {
@@ -36,10 +37,16 @@ const HomePage = async (props: Props) => {
   console.log("Session data:", session);
 
   return (
-    <div className="min-h-screen">
-      <h1>Welcome {user.firstName}</h1>
-      <h2>Your role is {user.role}</h2>
-      <Footer />
+    <div className="min-h-screen mx-4 my-9">
+      <div className="mx-3 sm:mx-8">
+        <h1 className="text-xl font-bold">Welcome, {user.firstName}</h1>
+        <p className="text-xs">
+          Your video call meeting hasn't been scheduled yet. Take a moment to
+          choose your preferred date and time.{" "}
+        </p>
+      </div>
+      <CompanyDashboardPanel />
+      <CompanyLocationDashboard />
     </div>
   );
 };

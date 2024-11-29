@@ -125,9 +125,9 @@ model Schedule {
 
   // Relations with proper constraints
   companyId String // Company ID for the schedule
-  company   User   @relation("CompanySchedules", fields: [companyId], references: [id]) // Company relation with proper constraints 
-  analystId String // Analyst ID for the schedule
-  analyst   User   @relation("AnalystSchedules", fields: [analystId], references: [id]) // Analyst relation with proper constraints
+  company   User    @relation("CompanySchedules", fields: [companyId], references: [id]) // Company relation with proper constraints 
+  analystId String? // Analyst ID for the schedule
+  analyst   User?   @relation("AnalystSchedules", fields: [analystId], references: [id]) // Analyst relation with proper constraints
 
   date      DateTime // Date of the schedule
   startTime DateTime // Start time of the schedule

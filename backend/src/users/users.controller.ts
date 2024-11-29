@@ -17,6 +17,11 @@ export class UsersController {
     return this.usersService.createUser(data);
   }
 
+  @Post('create-many')
+  async createManyUsers(@Body() data: any) {
+    return this.usersService.createManyUsers(data);
+  }
+
   //delete a user
   @Post('delete')
   async deleteUser(@Body() data: { id: string }) {

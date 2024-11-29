@@ -1,7 +1,78 @@
+"use client";
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
+import CompanyProfileForm from "@/components/company/CompanyProfileForm";
+import ProfilePictureForm from "@/components/users/ProfilePictureForm";
+import { useState } from "react";
+import { getSession } from "next-auth/react";
+import { Backend_URL } from "@/lib/Constants";
+import { z } from "zod";
+import { useRouter } from "next/navigation";
+
+const updateFormSchema = z.object({
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  company: z
+    .object({
+      companyName: z.string().optional(),
+      positions: z.string().optional(),
+      address: z
+        .object({
+          companyAddress: z.string().optional(),
+          province: z.string().optional(),
+          district: z.string().optional(),
+          city: z.string().optional(),
+          region: z.string().optional(),
+          postcode: z.string().optional(),
+          country: z.string().optional(),
+          latitude: z.number().optional(),
+          longitude: z.number().optional(),
+        })
+        .optional(),
+    })
+    .optional(),
+});
 const EditPage = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const Router = useRouter();
+  const handleSubmit = async (values: z.infer<typeof updateFormSchema>) => {
+    const filteredValues = JSON.parse(
+      JSON.stringify(values, (key, value) => (value ? value : undefined))
+    );
+    setIsSubmitting(true);
+    try {
+      const session = await getSession();
+      if (!session) {
+        throw new Error("User not logged in");
+      }
+
+      const result = await fetch(
+        Backend_URL + `/profile/update/${session.user.id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: "Bearer " + session.backendTokens.access_token,
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify(filteredValues),
+        }
+      );
+
+      if (!result.ok) {
+        throw new Error(`Error: ${result.statusText}`);
+      }
+
+      const data = await result.json();
+      console.log("User data updated:", data);
+      setIsSubmitting(false);
+      Router.replace("/profile");
+      // Add success handling here (e.g., showing a toast notification)
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      // Add error handling here (e.g., showing an error message)
+    }
+  };
+
   return (
     <div className="">
       <div className="mb-16 mx-5 px-5 lg:mx-20 lg:px-20 md:mx-10 md:px-10 ">
@@ -22,81 +93,22 @@ const EditPage = () => {
                 className="rounded-full w-16 h-16"
               />
               <div className="flex flex-col items-center md:items-start md:mx-6">
-                <h2 className="text-xl font-bold mt-2">John Doe</h2>
-                <p className="text-gray-500 text-xs">
-                  PT Pabrik Kertas Tjiwi Kimia
-                </p>
+                <ProfilePictureForm />
               </div>
             </div>
             <div className="flex flex-col items-center justify-center">
-              <Link href={"/profile/test"}>
-                <button className="bg-[#DC6803] text-sm my-2 px-2 py-1 text-white sm:px-4 sm:py-2 rounded-md">
-                  Save
-                </button>
-              </Link>
+              <button
+                type="submit"
+                form="company-profile-form"
+                disabled={isSubmitting}
+                className="bg-[#DC6803] text-sm my-2 px-2 py-1 text-white sm:px-4 sm:py-2 rounded-md disabled:opacity-50"
+              >
+                {isSubmitting ? "Saving..." : "Save Profile"}
+              </button>
             </div>
           </div>
-          <div className="flex flex-col my-8 md:grid md:grid-cols-2 md:gap-3">
-            <div className="">
-              <p className="text-gray-500 text-xs mb-1">First Name</p>
-              <div className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm mb-1">
-                <p className="my-1">Ando</p>
-              </div>
-            </div>
-            <div className="">
-              <p className="text-gray-500 text-xs mb-1">Last Name</p>
-              <div className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm mb-1">
-                <p className="my-1">Santos</p>
-              </div>
-            </div>
-            <div className="">
-              <p className="text-gray-500 text-xs my-1">Company Name</p>
-              <div className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm ">
-                <p className="my-1">PT Pabrik Kertas Tjiwi Kimia</p>
-              </div>
-            </div>
-            <div className="">
-              <p className="text-gray-500 text-xs my-1">Country</p>
-              <div className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm ">
-                <p className="my-1">Indonesia</p>
-              </div>
-            </div>
-            <div className="">
-              <p className="text-gray-500 text-xs my-1">Province</p>
-              <div className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm ">
-                <p className="my-1">DKI Jakarta</p>
-              </div>
-            </div>
-            <div className="">
-              <p className="text-gray-500 text-xs my-1">City</p>
-              <div className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm ">
-                <p className="my-1">Kota Jakarta Pusat</p>
-              </div>
-            </div>
-            <div className="">
-              <p className="text-gray-500 text-xs my-1">District</p>
-              <div className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm ">
-                <p className="my-1">Menteng</p>
-              </div>
-            </div>
-            <div className="">
-              <p className="text-gray-500 text-xs my-1">Postal Code</p>
-              <div className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm ">
-                <p className="my-1">10350 </p>
-              </div>
-            </div>
-            <div className="">
-              <p className="text-gray-500 text-xs my-1">Company Address</p>
-              <div className="flex h-full w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm ">
-                Jl. M.H. Thamrin, RT.9/RW.4, Gondangdia, Kec. Menteng, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta 10350
-              </div>
-            </div>
-            <div className="">
-              <p className="text-gray-500 text-xs my-1">Position </p>
-              <div className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm ">
-                <p className="my-1">Director of Finance</p>
-              </div>
-            </div>
+          <div className="flex flex-col ">
+            <CompanyProfileForm onSubmit={handleSubmit} />
           </div>
         </div>
       </div>

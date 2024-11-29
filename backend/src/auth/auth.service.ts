@@ -30,8 +30,6 @@ export class AuthService {
       data: { refreshToken: null },
     });
 
-    console.log('Updated user after null:', user);
-
     if (user.refreshToken === null) {
       return { message: 'User logged out' };
     } else {

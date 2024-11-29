@@ -15,7 +15,22 @@ export class ProfileService {
     private analystService: AnalystService,
   ) {}
 
-  private async uploadToImgBB(file: Express.Multer.File): Promise<string> {
+  async uploadToImgBB(
+    id: string,
+    file: Express.Multer.File,
+    updateData: UpdateProfileDto,
+  ): Promise<string> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        company: { include: { address: true } },
+        analyst: true,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
     try {
       const formData = new FormData();
       formData.append('image', file.buffer.toString('base64'));
@@ -29,18 +44,23 @@ export class ProfileService {
           },
         },
       );
-
-      return response.data.data.url;
+      let profpicURL = updateData.profpicUrl;
+      if (response.data.data.url) {
+        profpicURL = response.data.data.url;
+      }
+      const updatedUser = await this.prisma.user.update({
+        where: { id },
+        data: {
+          profpicUrl: profpicURL,
+        },
+      });
+      return profpicURL;
     } catch (error) {
       throw new BadRequestException('Image upload failed');
     }
   }
 
-  async updateProfileById(
-    id: string,
-    updateData: UpdateProfileDto,
-    profilePic?: Express.Multer.File,
-  ) {
+  async updateProfileById(id: string, updateData: UpdateProfileDto) {
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: {
@@ -51,11 +71,6 @@ export class ProfileService {
 
     if (!user) {
       throw new BadRequestException('User not found');
-    }
-
-    let profpicURL = updateData.profpicUrl;
-    if (profilePic) {
-      profpicURL = await this.uploadToImgBB(profilePic);
     }
 
     let addressData = updateData.company?.address;
@@ -73,7 +88,6 @@ export class ProfileService {
         data: {
           firstName: updateData.firstName,
           lastName: updateData.lastName,
-          profpicUrl: profpicURL,
         },
       });
 

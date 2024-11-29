@@ -16,19 +16,28 @@ import { UpdateProfileDto } from './dto/profile.dto';
 export class ProfileController {
   constructor(private profileService: ProfileService) {}
 
-  @Put(':id')
+  @Put('update/:id')
   @UseGuards(AuthGuard)
   @UseInterceptors(FileInterceptor('profilePic'))
   async updateProfile(
     @Param('id') id: string,
     @Body() UpdateProfileDto: UpdateProfileDto,
-    @UploadedFile() profilePic?: Express.Multer.File,
   ) {
-    
-    return await this.profileService.updateProfileById(
+    return await this.profileService.updateProfileById(id, UpdateProfileDto);
+  }
+
+  @Put('img/:id')
+  @UseGuards(AuthGuard)
+  @UseInterceptors(FileInterceptor('profilePic'))
+  async uploadToImgBB(
+    @Param('id') id: string,
+    @Body() UpdateProfileDto: UpdateProfileDto,
+    @UploadedFile() profilePic: Express.Multer.File,
+  ) {
+    return await this.profileService.uploadToImgBB(
       id,
-      UpdateProfileDto,
       profilePic,
+      UpdateProfileDto,
     );
   }
 }

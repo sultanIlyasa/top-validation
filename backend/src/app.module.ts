@@ -12,6 +12,7 @@ import { CompanyModule } from './company/company.module';
 import { AnalystModule } from './analyst/analyst.module';
 import { CompanyService } from './company/company.service';
 import { AnalystService } from './analyst/analyst.service';
+import { ScheduleModule } from './schedule/schedule.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AnalystService } from './analyst/analyst.service';
     ProfileModule,
     CompanyModule,
     AnalystModule,
+    ScheduleModule,
   ],
   controllers: [AppController, ProfileController],
   providers: [

@@ -104,4 +104,17 @@ export class UsersService {
       };
     }
   }
+  async createManyUsers(data: Prisma.UserCreateInput[]) {
+    // Use Promise.all to wait for all password hashes to complete
+    data = await Promise.all(
+      data.map(async (user) => {
+        user.password = await bcrypt.hash(user.password, 10);
+        return user;
+      }),
+    );
+
+    return this.prisma.user.createMany({
+      data,
+    });
+  }
 }
