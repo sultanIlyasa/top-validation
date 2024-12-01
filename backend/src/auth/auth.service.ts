@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma.service';
 import { LoginDto } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { access } from 'fs';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 const EXPIRE_TIME = 20 * 1000; // 20 seconds in milliseconds
 const expirationDate = new Date();
@@ -131,5 +132,26 @@ export class AuthService {
       }),
       expiresIn: expirationDate,
     };
+  }
+
+  async resetPassword(userId: string, resetPasswordDto: ResetPasswordDto) {
+    try {
+      if (
+        resetPasswordDto.password !== resetPasswordDto.confirmPassword
+      ) {
+        throw new Error('Passwords do not match');
+      }
+
+      const hashedPassword = await bcrypt.hash(resetPasswordDto.password, 10);
+
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { password: hashedPassword },
+      });
+
+      return { message: 'Password reset successfully' };
+    } catch (error) {
+      throw new Error('Failed to reset password');
+    }
   }
 }
