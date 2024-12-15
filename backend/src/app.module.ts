@@ -13,6 +13,8 @@ import { AnalystModule } from './analyst/analyst.module';
 import { CompanyService } from './company/company.service';
 import { AnalystService } from './analyst/analyst.service';
 import { ScheduleModule } from './schedule/schedule.module';
+import { MeetingsModule } from './meetings/meetings.module';
+import { WebSocketModule } from './websocket/websocket.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { ScheduleModule } from './schedule/schedule.module';
     CompanyModule,
     AnalystModule,
     ScheduleModule,
+    MeetingsModule,
+    WebSocketModule,
   ],
   controllers: [AppController, ProfileController],
   providers: [

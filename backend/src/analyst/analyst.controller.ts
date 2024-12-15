@@ -38,7 +38,7 @@ export class AnalystController {
     return this.analystService.findAll();
   }
 
-  @Get(':id')
+  @Get('find/:id')
   findOne(@Param('id') id: string) {
     return this.analystService.findOneById(id);
   }

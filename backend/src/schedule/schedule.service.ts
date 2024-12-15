@@ -204,21 +204,21 @@ export class ScheduleService {
       });
       console.log('8. Updated schedule result:', updatedSchedule);
 
-      // if (status === 'CONFIRMED' && analystId) {
-      //   console.log('9. Creating video call with analystId:', analystId);
-      //   const videoCall = await prisma.videoCall.create({
-      //     data: {
-      //       scheduleId: schedule.id,
-      //       companyId: schedule.companyId,
-      //       analystId,
-      //       roomId: `room_${schedule.id}`,
-      //       status: 'WAITING',
-      //       videoUrl: '',
-      //       expiredDate: new Date(new Date().setDate(new Date().getDate() + 7)),
-      //     },
-      //   });
-      //   console.log('10. Created video call:', videoCall);
-      // }
+      if (status === 'CONFIRMED' && analystId) {
+        console.log('9. Creating video call with analystId:', analystId);
+        const videoCall = await prisma.videoCall.create({
+          data: {
+            scheduleId: schedule.id,
+            companyId: schedule.companyId,
+            analystId,
+            roomId: `room_${schedule.id}`,
+            status: 'WAITING',
+            videoUrl: '',
+            expiredDate: new Date(new Date().setDate(new Date().getDate() + 7)),
+          },
+        });
+        console.log('10. Created video call:', videoCall);
+      }
 
       return updatedSchedule;
     });
@@ -252,6 +252,59 @@ export class ScheduleService {
             firstName: true,
             lastName: true,
             company: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getAllSchedules(): Promise<Schedule[]> {
+    return this.prisma.schedule.findMany({
+      orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
+      include: {
+        company: {
+          select: {
+            firstName: true,
+            lastName: true,
+            company: true,
+          },
+        },
+        analyst: {
+          select: {
+            firstName: true,
+            lastName: true,
+            analyst: true,
+          },
+        },
+        videoCall: {
+          select: {
+            id: true,
+            roomId: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getClosestSchedule(analystId: string): Promise<Schedule> {
+    return this.prisma.schedule.findFirst({
+      where: {
+        analystId,
+        date: { gte: new Date().toISOString() },
+      },
+      orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
+      include: {
+        company: {
+          select: {
+            firstName: true,
+            lastName: true,
+            company: true,
+          },
+        },
+        videoCall: {
+          select: {
+            id: true,
+            roomId: true,
           },
         },
       },

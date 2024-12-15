@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "@/hooks/use-toast";
@@ -15,6 +16,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface Schedule {
   id: string;
@@ -39,6 +41,7 @@ const FormSchema = z.object({
 });
 
 const AnalystScheduleForm = () => {
+  const router = useRouter();
   const { data: session } = useSession();
   const [schedules, setSchedules] = React.useState<Schedule[]>([]);
   const [selectedDateSchedules, setSelectedDateSchedules] = React.useState<
@@ -51,38 +54,42 @@ const AnalystScheduleForm = () => {
     resolver: zodResolver(FormSchema),
   });
 
-  const fetchSchedules = React.useCallback(async () => {
-    try {
-      const response = await fetch(
-        Backend_URL + `/schedule/available/${session?.user?.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${session?.backendTokens.access_token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch schedules");
-      }
-
-      const data = await response.json();
-      setSchedules(data);
-
-      const selectedDate = form.getValues("date");
-      if (selectedDate) {
-        updateSelectedDateSchedules(selectedDate, data);
-      }
-    } catch (error) {
-      console.error("Error fetching schedules:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load schedules",
-        variant: "destructive",
-      });
-    } finally {
+  const fetchSchedules = React.useCallback(() => {
+    if (!session?.user?.id) {
       setIsLoading(false);
+      return;
     }
+
+    fetch(Backend_URL + `/schedule/available/${session.user.id}`, {
+      headers: {
+        Authorization: `Bearer ${session.backendTokens.access_token}`,
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch schedules");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setSchedules(data);
+
+        const selectedDate = form.getValues("date");
+        if (selectedDate) {
+          updateSelectedDateSchedules(selectedDate, data);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching schedules:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load schedules",
+          variant: "destructive",
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, [session, form]);
 
   React.useEffect(() => {
@@ -120,52 +127,56 @@ const AnalystScheduleForm = () => {
     }
   };
 
-  const handleStatusChange = async (status: "CONFIRMED" | "REJECTED") => {
+  const handleStatusChange = (status: "CONFIRMED" | "REJECTED") => {
     const selectedScheduleId = form.getValues("selectedSchedule");
     if (!selectedScheduleId || !session?.user?.id) return;
 
     setProcessingId(selectedScheduleId);
-    try {
-      const response = await fetch(
-        Backend_URL + `/schedule/update/${selectedScheduleId}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.backendTokens.access_token}`,
-          },
-          body: JSON.stringify({
-            analystId: session.user.id,
-            status,
-          }),
+
+    fetch(Backend_URL + `/schedule/update/${selectedScheduleId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.backendTokens.access_token}`,
+      },
+      body: JSON.stringify({
+        analystId: session.user.id,
+        status,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then((error) => {
+            throw new Error(error.message || "Failed to update schedule");
+          });
         }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to update schedule");
-      }
-
-      toast({
-        title: "Success",
-        description: `Schedule ${status.toLowerCase()} successfully`,
+        return response;
+      })
+      .then(() => {
+        toast({
+          title: "Success",
+          description: `Schedule ${status.toLowerCase()} successfully`,
+        });
+        fetchSchedules();
+        form.setValue("selectedSchedule", undefined);
+        alert(`Schedule ${status}!`);
+        router.replace("/");
+      })
+      .catch((error) => {
+        console.error("Error updating schedule:", error);
+        toast({
+          title: "Error",
+          description:
+            error instanceof Error
+              ? error.message
+              : "Failed to update schedule",
+          variant: "destructive",
+        });
+      })
+      .finally(() => {
+        setProcessingId(null);
       });
-
-      fetchSchedules();
-      form.setValue("selectedSchedule", undefined);
-    } catch (error) {
-      console.error("Error updating schedule:", error);
-      toast({
-        title: "Error",
-        description:
-          error instanceof Error ? error.message : "Failed to update schedule",
-        variant: "destructive",
-      });
-    } finally {
-      setProcessingId(null);
-    }
   };
-
   const hasSchedules = (date: Date) => {
     return schedules.some((schedule) => {
       const scheduleDate = new Date(schedule.date);

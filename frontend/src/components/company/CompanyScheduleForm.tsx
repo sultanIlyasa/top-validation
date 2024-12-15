@@ -7,7 +7,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormMessage,
   FormLabel,
 } from "@/components/ui/form";
 import { Calendar } from "@/components/ui/calendar";
@@ -38,41 +37,40 @@ const CompanyScheduleForm = ({ onSubmit }: CompanyScheduleFormProps) => {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
-
-  React.useEffect(() => {
-    const fetchCompanyName = async () => {
-      try {
-        const session = await getSession();
+  useEffect(() => {
+    const fetchCompanyName = () => {
+      getSession().then((session) => {
         if (!session) {
           setIsLoading(false);
           return;
         }
 
-        const response = await fetch(
-          `${Backend_URL}/users/${session.user.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${session.backendTokens.access_token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch user data");
-        }
-
-        const user = await response.json();
-        setCompanyName(user.company.companyName);
-      } catch (error) {
-        console.error("Error fetching company name:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load company information",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
+        return fetch(`${Backend_URL}/users/${session.user.id}`, {
+          headers: {
+            Authorization: `Bearer ${session.backendTokens.access_token}`,
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Failed to fetch user data");
+            }
+            return response.json();
+          })
+          .then((user) => {
+            setCompanyName(user.company.companyName);
+          })
+          .catch((error) => {
+            console.error("Error fetching company name:", error);
+            toast({
+              title: "Error",
+              description: "Failed to load company information",
+              variant: "destructive",
+            });
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
+      });
     };
 
     fetchCompanyName();
@@ -230,7 +228,7 @@ const CompanyScheduleForm = ({ onSubmit }: CompanyScheduleFormProps) => {
               disabled={isSubmitting || isLoading}
               className="py-[18px] px-[40%] my-4 shadow-lg shadow-[#36FFBF4D] bg-[#00CA87]"
             >
-              {isSubmitting ? "Scheduling..." : "Next"}
+              {isSubmitting ? "Scheduling..." : "CONFRIM"}
             </Button>
           </div>
         </section>

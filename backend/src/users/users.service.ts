@@ -84,6 +84,10 @@ export class UsersService {
         company: { include: { address: true } },
         analyst: true,
         admin: true,
+        schedulesAsAnalyst: true,
+        schedulesAsCompany: true,
+        videoCallsAsAnalyst: true,
+        videoCallsAsCompany: true,
       },
     });
   }

@@ -1,19 +1,19 @@
-import { IsDate, IsNotEmpty, IsString } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateScheduleDto {
   @IsNotEmpty()
   @IsString()
-  companyId: string; // The ID of the company requesting the schedule
+  companyId: string;
 
   @IsNotEmpty()
-  @IsDate()
-  date: Date; // The date of the schedule
+  @IsDateString()
+  date: string;
 
   @IsNotEmpty()
-  @IsDate()
-  startTime: Date; // Start time for the schedule
+  @IsDateString()
+  startTime: string;
 
   @IsNotEmpty()
-  @IsDate()
-  endTime: Date; // End time for the schedule
+  @IsDateString()
+  endTime: string;
 }

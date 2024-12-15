@@ -62,14 +62,25 @@ export class ScheduleController {
     return this.scheduleService.getCompanySchedules(companyId);
   }
 
-  @Get('available/:analystId/')
+  @Get('available/:analystId')
   @Roles('ANALYST')
   async getAvailableSchedules(@Param('analystId') analystId: string) {
     return this.scheduleService.getAvailableSchedules();
   }
 
+  @Get('all/:analystId')
+  @Roles('ANALYST')
+  async getAllSchedules(@Param('analystId') analystId: string) {
+    return this.scheduleService.getAllSchedules();
+  }
   @Post('delete/:id')
   async deleteSchedule(@Param('id') scheduleId: string) {
     return this.scheduleService.deleteScheduleById(scheduleId);
+  }
+
+  @Get('closest/:analystId')
+  @Roles('ANALYST')
+  async getClosestSchedule(@Param('analystId') analystId: string) {
+    return this.scheduleService.getClosestSchedule(analystId);
   }
 }
