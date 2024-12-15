@@ -16,6 +16,7 @@ import { LoginDto } from './dto/auth.dto';
 import { RefreshJwtGuard } from './guard/refresh.guard';
 import { Response } from 'express';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -66,12 +67,16 @@ export class AuthController {
     return this.authService.refreshToken(req.user);
   }
 
-  @UseGuards(AuthGuard)
-  @Post('reset-password')
-  async resetPassword(
-    @Request() req, 
-    @Body() resetPasswordDto: ResetPasswordDto
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(forgotPasswordDto.email);
+  }
+
+  @Post('reset-password/:token')
+  async resetPasswordWithToken(
+    @Param('token') token: string,
+    @Body() resetPasswordDto: ResetPasswordDto,
   ) {
-    return this.authService.resetPassword(req.user.sub, resetPasswordDto);
+    return this.authService.resetPasswordWithToken(token, resetPasswordDto);
   }
 }

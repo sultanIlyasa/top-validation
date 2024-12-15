@@ -58,6 +58,8 @@ model User {
   videoCallsAsCompany VideoCall[] @relation("CompanyVideoCalls")
   videoCallsAsAnalyst VideoCall[] @relation("AnalystVideoCalls")
   locations           Location[]
+
+  passwordResetTokens PasswordResetToken[]
 }
 
 model Company {
@@ -209,3 +211,11 @@ model Location {
 
   @@index([userId])
 }
+
+model PasswordResetToken {
+  token     String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+}
+
