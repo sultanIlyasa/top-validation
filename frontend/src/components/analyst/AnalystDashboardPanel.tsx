@@ -264,7 +264,7 @@ const AnalystDashboardPanel: React.FC<AnalystDashboardPanelProps> = ({
                 </p>
               ) : (
                 <p className="text-[10px]">
-                  Meeting ID: {schedule.videoCall?.id}
+                  Meeting ID: {schedule.videoCall?.roomId}
                 </p>
               )}
               <div className="flex flex-row">

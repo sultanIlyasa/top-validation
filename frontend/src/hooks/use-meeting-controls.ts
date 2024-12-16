@@ -9,12 +9,16 @@ interface UseMeetingControlsProps {
   roomId: string;
   userId: string;
   userRole: string;
+  analystId: string;
+  companyId: string;
 }
 
 export function useMeetingControls({
   roomId,
   userId,
   userRole,
+  analystId,
+  companyId,
 }: UseMeetingControlsProps) {
   const router = useRouter();
   const [isConnected, setIsConnected] = useState(false);
@@ -73,7 +77,7 @@ export function useMeetingControls({
             });
           }
         } else {
-          const joinResult = await api.joinMeeting(userId,roomId);
+          const joinResult = await api.joinMeeting(userId, roomId);
           if (joinResult.status === "waiting") {
             // Handle waiting state if needed
             setError("Waiting for analyst to join");

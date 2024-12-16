@@ -115,7 +115,7 @@ const CompanyScheduleForm = ({ onSubmit }: CompanyScheduleFormProps) => {
                   onSelect={field.onChange}
                   //weekend disabled (Saturday and Sunday)
                   disabled={(date) =>
-                    date <= new Date() ||
+                    // date <= new Date() ||
                     date.getDay() === 0 ||
                     date.getDay() === 6
                   }

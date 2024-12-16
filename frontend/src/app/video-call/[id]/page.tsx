@@ -31,9 +31,11 @@ export default function MeetingRoom() {
     remoteVideoRef,
     error,
   } = useMeetingControls({
-    roomId: `room_${roomId}`,
+    roomId: roomId,
     userId: userId || "",
     userRole: user?.role || "",
+    analystId: user?.analyst?.id || "",
+    companyId: user?.company?.id || "",
   });
 
   useEffect(() => {

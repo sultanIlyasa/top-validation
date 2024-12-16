@@ -267,7 +267,10 @@ const AnalystScheduleForm = () => {
                   mode="single"
                   selected={field.value}
                   onSelect={handleDateSelect}
-                  disabled={(date) => date < new Date()}
+                  disabled={(date) =>
+                    // date <= new Date() ||
+                    date.getDay() === 0 || date.getDay() === 6
+                  }
                   initialFocus
                   className="w-full h-full"
                   components={{

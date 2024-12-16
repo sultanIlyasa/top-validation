@@ -94,7 +94,10 @@ export const api = {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(signalData),
+      body: JSON.stringify({
+        ...signalData, // Spread the existing signalData
+        roomId: roomId, // Add roomId to the request body
+      }),
     });
 
     if (!response.ok) {

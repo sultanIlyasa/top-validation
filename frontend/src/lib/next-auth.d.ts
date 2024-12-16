@@ -17,6 +17,7 @@ declare module "next-auth" {
         superior: string;
       };
       company?: {
+        id: string;
         companyName: string;
         positions: string;
         address: {
