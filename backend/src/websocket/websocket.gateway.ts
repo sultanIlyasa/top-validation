@@ -55,6 +55,22 @@ export class CustomWebSocketGateway
     try {
       const { roomId, userId } = data;
 
+      console.log(`User ${userId} attempting to join room ${roomId}`);
+
+      // Check if this user is already in the room
+      const roomClients = this.rooms.get(roomId);
+      const userAlreadyInRoom =
+        roomClients &&
+        Array.from(roomClients).some(
+          (clientId) =>
+            this.server.sockets.sockets.get(clientId)?.handshake.query
+              .userId === userId,
+        );
+
+      if (userAlreadyInRoom) {
+        console.log(`User ${userId} already in room ${roomId}, skipping join`);
+        return { success: false, message: 'Already in room' };
+      }
       // Join the room
       await client.join(roomId);
 
@@ -62,6 +78,11 @@ export class CustomWebSocketGateway
         this.rooms.set(roomId, new Set());
       }
       this.rooms.get(roomId).add(client.id);
+
+      console.log(
+        `Current room ${roomId} clients:`,
+        Array.from(this.rooms.get(roomId)),
+      );
 
       // Notify other participants
       client.to(roomId).emit('peer-joined', {
@@ -71,10 +92,10 @@ export class CustomWebSocketGateway
 
       return { success: true, roomId: roomId };
     } catch (error) {
+      console.error(`Error joining room :`, error);
       return { success: false, error: error.message };
     }
   }
-
   @SubscribeMessage('leave-room')
   async handleLeaveRoom(
     @ConnectedSocket() client: Socket,

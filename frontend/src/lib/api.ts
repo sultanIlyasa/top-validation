@@ -1,4 +1,89 @@
 import { Backend_URL } from "./Constants";
+import io, { Socket } from 'socket.io-client';
+
+class WebSocketManager {
+  private socket: Socket | null = null;
+  private listeners: Map<string, Set<(data: any) => void>> = new Map();
+
+  connect(roomId: string, userId: string) {
+    // Disconnect existing socket if any
+    this.disconnect();
+
+    // Create new socket connection
+    this.socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:8000', {
+      query: { roomId, userId }
+    });
+
+    // Setup default event listeners
+    this.socket.on('connect', () => {
+      console.log('WebSocket connected');
+      this.socket?.emit('join-room', { roomId, userId });
+    });
+
+    this.socket.on('connect_error', (error) => {
+      console.error('WebSocket connection error:', error);
+    });
+
+    this.socket.on('disconnect', () => {
+      console.log('WebSocket disconnected');
+    });
+
+    // Setup signal listeners
+    this.setupSignalListeners();
+
+    return this;
+  }
+
+  private setupSignalListeners() {
+    const signalEvents = ['signal', 'peer-joined', 'peer-left', 'peer-disconnected'];
+  
+    signalEvents.forEach(event => {
+      this.socket?.on(event, (data) => {
+        const eventListeners = this.listeners.get(event);
+        eventListeners?.forEach(listener => listener(data));
+      });
+    });
+  }
+
+  subscribeToSignals(event: string, callback: (data: any) => void) {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set());
+    }
+    this.listeners.get(event)?.add(callback);
+  }
+
+  unsubscribeFromSignals(event: string, callback?: (data: any) => void) {
+    const eventListeners = this.listeners.get(event);
+    if (eventListeners) {
+      if (callback) {
+        eventListeners.delete(callback);
+      } else {
+        eventListeners.clear();
+      }
+    }
+  }
+
+  sendSignal(roomId: string, signalData: {
+    type: string;
+    signal?: any;
+    targetId?: string;
+  }) {
+    this.socket?.emit('signal', {
+      roomId,
+      ...signalData
+    });
+  }
+
+  disconnect() {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+      this.listeners.clear();
+    }
+  }
+}
+
+export const webSocketManager = new WebSocketManager();
 
 export const api = {
   /**
@@ -23,7 +108,6 @@ export const api = {
     return {
       success: data.success,
       isValid: data.isValid,
-      // Optional: Check if the user is an analyst
       isAnalyst: data.isAnalyst || false,
     };
   },
@@ -89,23 +173,9 @@ export const api = {
       signal?: any;
     }
   ) => {
-    const response = await fetch(`${Backend_URL}/meetings/${roomId}/signal`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...signalData, // Spread the existing signalData
-        roomId: roomId, // Add roomId to the request body
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to send signal");
-    }
-
-    return response.json();
+    // Use WebSocket for signaling instead of HTTP
+    webSocketManager.sendSignal(roomId, signalData);
+    return { success: true };
   },
 
   /**
@@ -128,4 +198,21 @@ export const api = {
 
     return response.json();
   },
+
+  // WebSocket Management
+  connectWebSocket: (roomId: string, userId: string) => {
+    return webSocketManager.connect(roomId, userId);
+  },
+
+  subscribeToSignals: (event: string, callback: (data: any) => void) => {
+    webSocketManager.subscribeToSignals(event, callback);
+  },
+
+  unsubscribeFromSignals: (event: string, callback?: (data: any) => void) => {
+    webSocketManager.unsubscribeFromSignals(event, callback);
+  },
+
+  disconnectWebSocket: () => {
+    webSocketManager.disconnect();
+  }
 };

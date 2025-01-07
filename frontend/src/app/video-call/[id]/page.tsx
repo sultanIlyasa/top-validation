@@ -12,11 +12,9 @@ export default function MeetingRoom() {
   const params = useParams();
   const { toast } = useToast();
   const roomId = params.id as string;
-  // TODO: Replace with actual user authentication context
   const { data: session } = useSession();
   const user = session?.user;
   const userId = user?.id;
-  console.log("User ID: ", userId);
 
   const {
     localStream,
@@ -66,15 +64,15 @@ export default function MeetingRoom() {
         <div className="flex-1 relative bg-gray-100 rounded-lg overflow-hidden">
           {remoteStream ? (
             <video
-              ref={remoteVideoRef}
+              ref={(ref) => {
+                if (ref) ref.srcObject = remoteStream;
+              }}
               autoPlay
               playsInline
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-500">
-              Waiting for other participant...
-            </div>
+            <div>Waiting for other participant...</div>
           )}
         </div>
 

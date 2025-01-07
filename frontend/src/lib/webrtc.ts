@@ -1,7 +1,4 @@
-interface ExtendedRTCConfiguration extends RTCConfiguration {
-  sdpSemantics?: "unified-plan" | "plan-b";
-  bundlePolicy?: "balanced" | "max-compat" | "max-bundle";
-}
+
 
 export class WebRTCConnection {
   private peerConnection: RTCPeerConnection;
@@ -18,13 +15,13 @@ export class WebRTCConnection {
   }
 
   private createPeerConnection(): RTCPeerConnection {
-    const configuration: ExtendedRTCConfiguration = {
+    const configuration: RTCConfiguration = {
       iceServers: [
         { urls: "stun:stun.l.google.com:19302" },
         { urls: "stun:stun1.l.google.com:19302" },
       ],
-      sdpSemantics: "unified-plan",
-      bundlePolicy: "max-bundle",
+      // sdpSemantics: "unified-plan",
+      // bundlePolicy: "max-bundle",
     };
 
     const pc = new RTCPeerConnection(configuration);
