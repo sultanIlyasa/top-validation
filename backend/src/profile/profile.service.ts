@@ -54,7 +54,7 @@ export class ProfileService {
           profpicUrl: profpicURL,
         },
       });
-      return profpicURL;
+      return updatedUser.profpicUrl;
     } catch (error) {
       throw new BadRequestException('Image upload failed');
     }
@@ -88,6 +88,7 @@ export class ProfileService {
         data: {
           firstName: updateData.firstName,
           lastName: updateData.lastName,
+          profpicUrl: updateData.profpicUrl,
         },
       });
 

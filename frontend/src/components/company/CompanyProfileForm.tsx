@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -73,7 +73,13 @@ const CompanyProfileForm = ({ onSubmit }: CompanyProfileFormProps) => {
       if (session?.user?.id) {
         try {
           const response = await fetch(
-            Backend_URL + `/users/${session.user.id}`
+            Backend_URL + `/users/${session.user.id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${session.backendTokens.access_token}`, // Add authorization header
+                "Content-Type": "application/json",
+              },
+            }
           );
           const userData = await response.json();
 
@@ -106,7 +112,6 @@ const CompanyProfileForm = ({ onSubmit }: CompanyProfileFormProps) => {
 
     fetchUserData();
   }, [session, form]);
-
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -285,7 +290,8 @@ const CompanyProfileForm = ({ onSubmit }: CompanyProfileFormProps) => {
           render={({ field }) => (
             <FormItem>
               <p className="text-gray-500 text-xs mb-1">
-                Company Address<span className="text-red-700">* </span>(full address)
+                Company Address<span className="text-red-700">* </span>(full
+                address)
               </p>
               <FormControl>
                 <Input

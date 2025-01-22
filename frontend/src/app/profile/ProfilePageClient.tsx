@@ -65,7 +65,7 @@ const ProfilePageClient = ({ user }: Props) => {
           <div className="flex flex-col sm:flex-row justify-center md:justify-between">
             <div className="flex flex-col justify-center items-center md:flex-row ">
               <Image
-                src={user.profpicUrl}
+                src={user.profpicUrl ? user.profpicUrl : "/bixbox-logo.png"}
                 width={100}
                 height={100}
                 alt={`${user.firstName}'s profile`}

@@ -1,5 +1,4 @@
-import { IsEmail, isString, IsString, IsNotEmpty } from 'class-validator';
-
+import { IsEmail, IsString, IsNotEmpty, IsOptional } from 'class-validator';
 export class UpdateProfileDto {
   @IsString()
   firstName?: string;
@@ -7,8 +6,9 @@ export class UpdateProfileDto {
   @IsString()
   lastName?: string;
 
-  @IsString()
-  profpicUrl?: string;
+  @IsString({ message: 'Profile picture URL must be a string' })
+  @IsOptional() // Add this decorator to make it optional
+  profpicUrl?: string | null; // Add null as a possible type
 
   company?: {
     companyName?: string;
